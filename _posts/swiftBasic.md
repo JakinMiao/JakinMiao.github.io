@@ -1,0 +1,207 @@
+### Swift 基础语法介绍:
+1. 元组: 元组的创建方式， 元组可以把任何一种数据类型数据都放在定义里面。
+``` swift
+let className = ("电子信息工程", 122, "张三");     
+print("专业名称:\(className.0)");        
+print("班级:\(className.1)");  
+print("名称:\(className.2)");
+
+推荐方式:效率更高，避免歧义
+let myName = (firstName: "Liu",lastName: "Yong");
+print("第一个名字为:\(myName.firstName)")
+print("第二个名字为:\(myName.lastName)");
+```
+2.swift 文件访问控制：Objective-c是没有严格的访问控制的。
+private：只能在类中进行访问。
+fileprivate：只有在当前源文件可以访问。
+internal：可以访问到模块源文件的实体进行访问，别人不能访问该模块中源文件里的实体。。（默认值，没有特殊声明的都是这个权限）
+public：可以访问自己模块中源文件里的任何实体，别人也可以通过引入该模块来访问源文件里的所有实体。
+
+
+3.闭包:闭包就是包含一定功能的代码块，可以作为参数或在代码中使用，类似于Objective-C中的blocks。闭包的语法使用介绍:创建方式: { (paramters)  -> return type in }
+``` swift
+let add = {(value1 : Int , value2 : Int) -> Int in
+	return value1 + value2;
+}
+let result = add(1, 1);
+print("相加的和为:\(result)");
+
+//定义一个闭包类型
+typealias FinishBlock = (_ name: String) -> Void;
+//作为函数参数传入
+func myBlock(finshBlock: FinishBlock) {
+   finshBlock("name");
+}
+myBlock {(name) in
+	print("我的名字就是\(name)");
+}
+```
+  闭包有两种类型:可逃逸类型和非逃逸类型的闭包。swift 3.0 后创建可逃逸类型闭包用关键字@escaping 进行修饰。两者的区别在于生命周期不一样，逃逸型闭包在函数结束的时候，仍然可以被外包对象所使用，相反非逃逸型闭包在函数结束后生命周期就结束。闭包可以作为函数参数使用，也可以单独使用。
+  
+ 4. 函数的定义:
+``` swift
+//对象方法
+func test(myNumber number : Int)-> Int {
+	...
+}
+//类型方法
+class func test() {
+	...
+}
+```
+函数参数都是有外部参数名，内部参数名，不一样的是，内部参数名在函数体内部使用，外部参数名在外部使用。自我感觉上有外部参数名的函数在调用时外部看起来代码清晰点。注意：函数的参数一般为常量，不可在函数内部进行修改，需要在函数内部修改需要使用inout修饰符修饰参数。
+
+5.枚举(值类型)枚举可分为相关值和原始值，区别在于相关值的数据在创建时才会被确定，所以值会是不一样的，原始值的数据始终是一样的，一般情况下，使用原始值比较多。
+``` swift
+//创建原始值
+ enum UIControlContentHorizontalAlignment : Int {
+    case center
+    case left
+    case right
+    case fill
+}
+//创建相关值
+enum Employee {
+	case Name(String)
+	case Salary(Int, Int)
+}
+let employeeName = Employee.Name("Jakin");
+let employSalary = Employee.Salary(21, 23);
+        
+switch employeeName {
+   case .Name(let aa):
+       print("名字是：\(aa)")
+  case .Salary(let basic, let bonus):
+       print("薪水是:\(basic), 奖金:\(bonus)");
+}
+```
+6.结构体(值类型):用来定义一些简单的数据类型，我很少用到，只是以前在 c语言里面用到。值类型的属性一般不会再实例方法中修改值，一定要这样做的话使用mutating 修饰这个实例方法
+``` swift
+struct MarksStruct {
+    var mark: Int;
+    var name: String;
+    init(mark: Int, name: String) {
+        self.mark = mark;
+        self.name = name;
+    }
+}
+let mark = MarksStruct(mark: 100, name: "Niko");
+print("Mark 是\(mark.mark)");
+print("aa 是\(mark.name)");
+```
+7.类的使用：类的创建必须要要有一个指定构造方法，不提供的默认使用系统的构造方法init(),需要自定义构造方法必须要使用convenience进行修饰构造方法，必须调用其他convenience 修饰的便利构造方法或者指定构造方法，其实最终都是要调用指定构造方法。
+``` swift
+//定义一个类
+class Person {
+	var name: String?;
+    var className: String?;
+    var age: Int?;
+    //便利构造方法，  实际指定构造方法是init()，在便利构造方法里也是调用了指定构造方法的
+    convenience init(name: String, age: Int) {
+        self.init();
+        self.name = name;
+        self.age = age;
+    }
+}
+```
+8.下标脚本：允许传入一个或者多个索引值对实例进行访问或者赋值。可以自由的创建多个，会自动根据索引去做匹配下标语法。
+``` swift
+class Person {
+	let indexArray = ["Niko", "Philip", "Jakin"];  
+	subscript(index: Int)-> String {
+        set {
+            ...//做一些赋值操作
+        }
+        get {
+            return indexArray[index];
+        }
+    }
+}
+let person = Person();
+print("男性名字\(person[1])");
+```
+9.ARC机制：使用创建init()创建实例，arc会分配内存来存储信息，实例不再被使用使用时，arc会自动释放内存，内存就可以被其他利用，iOS会通过自动引用计数来跟踪管理内存使用。一般情况下我们不需要管理内存。然而有时候我们会写出互相引用的代码就会导致循环引用内存泄漏。
+解决办法：1.弱引用 (weak)   2.无主引用(unowned)。
+``` swift
+//弱引用使用 使用weak弱化
+class SubModule: NSObject {
+    let number: Int;
+    init(number: Int) {
+        self.number = number;
+    } 
+    //弱化引用
+    weak var topic: Module?;
+    deinit {
+        print("子模块topic数为\(number)")
+    } 
+}
+class Module: NSObject {
+    let name: String;
+    init(name: String) {
+        self.name = name;
+    }
+    var sub : SubModule?;
+    deinit {
+        print("\(name)主模块");
+    }
+}
+var toc: Module?;
+var list: SubModule?;        
+list = SubModule(number: 4);
+toc = Module(name: "arc");
+toc!.sub = list;
+list!.topic = toc;
+toc = nil;
+list = nil;
+```
+10.类型转换：swift使用is 和as 操作符实现。is用于检测值的类型，as用于转换类型。
+is 用于检测一个类实例是否属于某个类型。是就返回true，不是返回false。
+as使用分为:as? 和 as! ，确定向下转型成功才使用as!,否则使用as?。
+``` swift
+//类创建声明与上面相同
+let testPerson = Person();
+let testAddress = Address();
+let array = [testPerson, testAddress];
+for item in array {
+	//这里使用as!会报错。
+    if let person = item as? Person {
+	      print("我是人");
+    } else if let address = item as? Address {
+		 print("我是地址");
+   }
+}
+```
+11.扩展：向已有的类型或结构体，枚举添加新功能。只能加，不能重写。跟继承是不一样的。
+extension SomeType { ....}
+```swift
+extension UIView {
+    public var x: CGFloat {
+        get {
+            return self.frame.origin.x
+        }
+        set {
+            var r = self.frame
+            r.origin.x = newValue
+            self.frame = r
+        }
+    }
+    public var y: CGFloat {
+        get {
+            return self.frame.origin.y
+        }
+        set {
+            var r = self.frame
+            r.origin.y = newValue
+            self.frame = r
+        }
+     }
+}
+let view = UIView();
+view.frame = CGRect(x: 30, y: 50, width: 100, height: 30); 
+view.backgroundColor = UIColor.red;
+／／
+view.y = 100;
+self.view.addSubview(view);
+
+print("print view.x \(view.x)")
+```
